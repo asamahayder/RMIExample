@@ -13,6 +13,7 @@ public class Database {
 
     public Database() {
         createUserTable();
+        createConfigTable();
         insertUserTable();
         selectAllFromUserTable();
     }
@@ -32,6 +33,26 @@ public class Database {
                 byte[] salt = rs.getBytes("SALT");
 
                 return new UserDTO(name, password, salt);
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+
+        return null;
+    }
+
+    public ConfigDTO selectConfig() {
+        try {
+            connect();
+            Statement stmt = connection.createStatement();
+
+            String sql = "SELECT * FROM CONFIG WHERE ID = 1;";
+
+            ResultSet rs = stmt.executeQuery(sql);
+
+            if (rs.next()) {
+                String description = rs.getString("DESCRIPTION");
+                return new ConfigDTO(description);
             }
         } catch (Exception e) {
             System.out.println(e.getMessage());
@@ -72,6 +93,25 @@ public class Database {
                     "NAME TEXT NOT NULL, " +
                     "PASSWORD CHAR(512), " +
                     "SALT BLOB)";
+
+            stmt.executeUpdate(sql);
+            stmt.close();
+
+            disconnect();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    private void createConfigTable() {
+        try {
+            connect();
+
+            Statement stmt = connection.createStatement();
+
+            String sql = "CREATE TABLE CONFIG " +
+                    "(ID INT PRIMARY KEY NOT NULL, " +
+                    "DESCRIPTION TEXT NOT NULL)";
 
             stmt.executeUpdate(sql);
             stmt.close();
