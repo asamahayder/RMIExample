@@ -32,8 +32,10 @@ public class Database {
                 String password = rs.getString("PASSWORD");
                 byte[] salt = rs.getBytes("SALT");
 
+                disconnect();
                 return new UserDTO(name, password, salt);
             }
+            disconnect();
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
@@ -41,24 +43,45 @@ public class Database {
         return null;
     }
 
-    public ConfigDTO selectConfig() {
+    public ConfigDTO getConfig(int id) {
         try {
             connect();
             Statement stmt = connection.createStatement();
 
-            String sql = "SELECT * FROM CONFIG WHERE ID = 1;";
+            String sql = "SELECT * FROM CONFIG WHERE ID = " + id + ";";
 
             ResultSet rs = stmt.executeQuery(sql);
 
             if (rs.next()) {
                 String description = rs.getString("DESCRIPTION");
+                stmt.close();
+                disconnect();
                 return new ConfigDTO(description);
             }
+
+            stmt.close();
+            disconnect();
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
 
         return null;
+    }
+
+    public void setConfig(int id, ConfigDTO config) {
+        try {
+            connect();
+
+            Statement stmt = connection.createStatement();
+
+            String sql = "UPDATE CONFIG SET DESCRIPTION = " + config.getDescription() + " WHERE ID = " + id + ";";
+            stmt.executeUpdate(sql);
+            stmt.close();
+
+            disconnect();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
     }
 
     private static void connect() {
