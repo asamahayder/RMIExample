@@ -161,9 +161,9 @@ public class PrinterServant extends UnicastRemoteObject implements PrinterServic
         if (!isAuthenticated(authObject)) return "Not authenticated!";
         if (!started) return "Printer server not started.";
 
-        //TODO
+        Database db = new Database();
 
-        return null;
+        return db.getConfig(parameter).getDescription();
     }
 
     @Override
@@ -171,9 +171,10 @@ public class PrinterServant extends UnicastRemoteObject implements PrinterServic
         if (!isAuthenticated(authObject)) return "Not authenticated!";
         if (!started) return "Printer server not started.";
 
-        //TODO
+        Database db = new Database();
+        db.setConfig(parameter, value);
 
-        return null;
+        return "Config updated!";
     }
 
     private boolean isAuthenticated(String authObject) {

@@ -3,6 +3,7 @@ package database;
 import java.sql.*;
 import java.util.Arrays;
 
+import static database.Filer.deleteDatabaseFile;
 import static database.Filer.getPath;
 import static database.Hasher.getSalt;
 import static database.Hasher.hashPassword;
@@ -12,9 +13,11 @@ public class Database {
     private static Connection connection = null;
 
     public Database() {
+        deleteDatabaseFile();
         createUserTable();
         createConfigTable();
         insertUserTable();
+        insertConfig();
         selectAllFromUserTable();
     }
 
@@ -43,20 +46,20 @@ public class Database {
         return null;
     }
 
-    public ConfigDTO getConfig(int id) {
+    public ConfigDTO getConfig(String parameter) {
         try {
             connect();
             Statement stmt = connection.createStatement();
 
-            String sql = "SELECT * FROM CONFIG WHERE ID = " + id + ";";
+            String sql = "SELECT * FROM CONFIG WHERE DESCRIPTION = " + parameter + ";";
 
             ResultSet rs = stmt.executeQuery(sql);
 
             if (rs.next()) {
-                String description = rs.getString("DESCRIPTION");
+                String value = rs.getString("VALUE");
                 stmt.close();
                 disconnect();
-                return new ConfigDTO(description);
+                return new ConfigDTO(value);
             }
 
             stmt.close();
@@ -68,13 +71,13 @@ public class Database {
         return null;
     }
 
-    public void setConfig(int id, ConfigDTO config) {
+    public void setConfig(String parameter, String value) {
         try {
             connect();
 
             Statement stmt = connection.createStatement();
 
-            String sql = "UPDATE CONFIG SET DESCRIPTION = " + config.getDescription() + " WHERE ID = " + id + ";";
+            String sql = "UPDATE CONFIG SET VALUE = " + value + " WHERE DESCRIPTION = " + parameter + ";";
             stmt.executeUpdate(sql);
             stmt.close();
 
@@ -134,7 +137,8 @@ public class Database {
 
             String sql = "CREATE TABLE CONFIG " +
                     "(ID INT PRIMARY KEY NOT NULL, " +
-                    "DESCRIPTION TEXT NOT NULL)";
+                    "DESCRIPTION TEXT NOT NULL, " +
+                    "VALUE TEXT NOT NULL)";
 
             stmt.executeUpdate(sql);
             stmt.close();
@@ -165,6 +169,30 @@ public class Database {
                 stmt.executeUpdate();
             }
 
+            stmt.close();
+
+            connection.commit();
+            disconnect();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    private void insertConfig() {
+        try {
+            connect();
+            connection.setAutoCommit(false);
+
+            PreparedStatement stmt = null;
+
+
+
+
+            String sql = "INSERT INTO CONFIG (ID, DESCRIPTION, VALUE) " +
+                    "VALUES ("+1+", '" + "testParam" + "', '" + "testString" + "');";
+
+            stmt = connection.prepareStatement(sql);
+            stmt.executeUpdate();
             stmt.close();
 
             connection.commit();

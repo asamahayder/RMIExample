@@ -2,13 +2,13 @@ package database;
 
 public class ConfigDTO {
 
-    private String description;
+    private String value;
 
     public ConfigDTO(String description) {
-        this.description = description;
+        this.value = description;
     }
 
     public String getDescription() {
-        return description;
+        return value;
     }
 }
