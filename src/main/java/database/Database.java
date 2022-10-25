@@ -51,7 +51,7 @@ public class Database {
             connect();
             Statement stmt = connection.createStatement();
 
-            String sql = "SELECT * FROM CONFIG WHERE DESCRIPTION = " + parameter + ";";
+            String sql = "SELECT * FROM CONFIG WHERE DESCRIPTION = '" + parameter + "';";
 
             ResultSet rs = stmt.executeQuery(sql);
 
@@ -77,7 +77,7 @@ public class Database {
 
             Statement stmt = connection.createStatement();
 
-            String sql = "UPDATE CONFIG SET VALUE = " + value + " WHERE DESCRIPTION = " + parameter + ";";
+            String sql = "UPDATE CONFIG SET VALUE = " + value + " WHERE DESCRIPTION = '" + parameter + "';";
             stmt.executeUpdate(sql);
             stmt.close();
 

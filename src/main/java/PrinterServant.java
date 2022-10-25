@@ -162,8 +162,10 @@ public class PrinterServant extends UnicastRemoteObject implements PrinterServic
         if (!started) return "Printer server not started.";
 
         Database db = new Database();
+        String value = db.getConfig(parameter).getDescription();
 
-        return db.getConfig(parameter).getDescription();
+        if (value != null) return value;
+        else return "Value not found!!";
     }
 
     @Override
