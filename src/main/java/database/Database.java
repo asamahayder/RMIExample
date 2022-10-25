@@ -13,12 +13,17 @@ public class Database {
     private static Connection connection = null;
 
     public Database() {
+
+    }
+
+    public static void createDatabase() {
         deleteDatabaseFile();
         createUserTable();
         createConfigTable();
         insertUserTable();
         insertConfig();
         selectAllFromUserTable();
+        selectAllFromConfigTable();
     }
 
     public UserDTO selectUser(String username) {
@@ -51,7 +56,7 @@ public class Database {
             connect();
             Statement stmt = connection.createStatement();
 
-            String sql = "SELECT * FROM CONFIG WHERE DESCRIPTION = " + parameter + ";";
+            String sql = "SELECT * FROM CONFIG WHERE DESCRIPTION = '" + parameter + "';";
 
             ResultSet rs = stmt.executeQuery(sql);
 
@@ -75,11 +80,12 @@ public class Database {
         try {
             connect();
 
-            Statement stmt = connection.createStatement();
-
-            String sql = "UPDATE CONFIG SET VALUE = " + value + " WHERE DESCRIPTION = " + parameter + ";";
-            stmt.executeUpdate(sql);
-            stmt.close();
+            String pQuery = "UPDATE CONFIG SET VALUE = ? WHERE DESCRIPTION = ?";
+            PreparedStatement pstmt = connection.prepareStatement(pQuery);
+            pstmt.setString(1, value);
+            pstmt.setString(2, parameter);
+            pstmt.execute();
+            pstmt.close();
 
             disconnect();
         } catch (Exception e) {
@@ -108,7 +114,7 @@ public class Database {
         }
     }
 
-    private void createUserTable() {
+    private static void createUserTable() {
         try {
             connect();
 
@@ -129,7 +135,7 @@ public class Database {
         }
     }
 
-    private void createConfigTable() {
+    private static void createConfigTable() {
         try {
             connect();
 
@@ -149,7 +155,7 @@ public class Database {
         }
     }
 
-    private void insertUserTable() {
+    private static void insertUserTable() {
         try {
             connect();
             connection.setAutoCommit(false);
@@ -178,7 +184,7 @@ public class Database {
         }
     }
 
-    private void insertConfig() {
+    private static void insertConfig() {
         try {
             connect();
             connection.setAutoCommit(false);
@@ -202,7 +208,7 @@ public class Database {
         }
     }
 
-    private void selectAllFromUserTable() {
+    private static void selectAllFromUserTable() {
         try {
             connect();
 
@@ -221,6 +227,28 @@ public class Database {
                 System.out.println("NAME = " + username);
                 System.out.println("PASSWORD = " + password);
                 System.out.println("SALT = " + Arrays.toString(salt));
+            }
+
+            rs.close();
+            stmt.close();
+            disconnect();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    private static void selectAllFromConfigTable() {
+        try {
+            connect();
+
+            connection.setAutoCommit(false);
+
+            Statement stmt = connection.createStatement();
+            ResultSet rs = stmt.executeQuery("SELECT * FROM CONFIG");
+
+            while (rs.next()) {
+                System.out.println(rs.getString("DESCRIPTION"));
+                System.out.println(rs.getString("VALUE"));
             }
 
             rs.close();
