@@ -1,5 +1,10 @@
+import database.Database;
+import database.Hasher;
+import database.UserDTO;
+
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 
 public class PrinterServant extends UnicastRemoteObject implements PrinterService {
@@ -18,8 +23,8 @@ public class PrinterServant extends UnicastRemoteObject implements PrinterServic
     }
 
     @Override
-    public String print(String fileName, String printer) throws RemoteException {
-
+    public String print(String fileName, String printer, String authObject) throws RemoteException {
+        if (!isAuthenticated(authObject)) return "Not authenticated!";
         if (!started) return "Printer server not started.";
 
         boolean printerFound = false;
@@ -40,7 +45,8 @@ public class PrinterServant extends UnicastRemoteObject implements PrinterServic
     }
 
     @Override
-    public String queue(String printer) throws RemoteException {
+    public String queue(String printer, String authObject) throws RemoteException {
+        if (!isAuthenticated(authObject)) return "Not authenticated!";
         if (!started) return "Printer server not started.";
         boolean printerFound = false;
 
@@ -65,7 +71,8 @@ public class PrinterServant extends UnicastRemoteObject implements PrinterServic
     }
 
     @Override
-    public String topQueue(String printer, int job) throws RemoteException {
+    public String topQueue(String printer, int job, String authObject) throws RemoteException {
+        if (!isAuthenticated(authObject)) return "Not authenticated!";
         if (!started) return "Printer server not started.";
         boolean printerFound = false;
         boolean jobFound = false;
@@ -86,7 +93,8 @@ public class PrinterServant extends UnicastRemoteObject implements PrinterServic
     }
 
     @Override
-    public String start() throws RemoteException {
+    public String start(String authObject) throws RemoteException {
+        if (!isAuthenticated(authObject)) return "Not authenticated!";
         started = true;
 
         StringBuilder builder = new StringBuilder();
@@ -102,7 +110,8 @@ public class PrinterServant extends UnicastRemoteObject implements PrinterServic
     }
 
     @Override
-    public String stop() throws RemoteException {
+    public String stop(String authObject) throws RemoteException {
+        if (!isAuthenticated(authObject)) return "Not authenticated!";
         if (!started) return "Printer server not started.";
         started = false;
 
@@ -115,18 +124,20 @@ public class PrinterServant extends UnicastRemoteObject implements PrinterServic
     }
 
     @Override
-    public String restart() throws RemoteException {
+    public String restart(String authObject) throws RemoteException {
+        if (!isAuthenticated(authObject)) return "Not authenticated!";
         if (!started) return "Printer server not started.";
 
-        stop();
+        stop(authObject);
 
-        start();
+        start(authObject);
 
         return "Server successfully restarted";
     }
 
     @Override
-    public String status(String printer) throws RemoteException {
+    public String status(String printer, String authObject) throws RemoteException {
+        if (!isAuthenticated(authObject)) return "Not authenticated!";
         if (!started) return "Printer server not started.";
         boolean printerFound = false;
         StringBuilder builder = new StringBuilder();
@@ -146,7 +157,8 @@ public class PrinterServant extends UnicastRemoteObject implements PrinterServic
     }
 
     @Override
-    public String readConfig(String parameter) throws RemoteException {
+    public String readConfig(String parameter, String authObject) throws RemoteException {
+        if (!isAuthenticated(authObject)) return "Not authenticated!";
         if (!started) return "Printer server not started.";
 
         //TODO
@@ -155,11 +167,32 @@ public class PrinterServant extends UnicastRemoteObject implements PrinterServic
     }
 
     @Override
-    public String setConfig(String parameter, String value) throws RemoteException {
+    public String setConfig(String parameter, String value, String authObject) throws RemoteException {
+        if (!isAuthenticated(authObject)) return "Not authenticated!";
         if (!started) return "Printer server not started.";
 
         //TODO
 
         return null;
     }
+
+    private boolean isAuthenticated(String authObject) {
+        try{
+            Database db = new Database();
+
+            String username = authObject.split(";")[0];
+            String password = authObject.split(";")[1];
+
+            UserDTO userDTO = db.selectUser(username);
+
+            if (userDTO == null) return false;
+
+            return Hasher.hashPassword(password, userDTO.getSalt()).equals(userDTO.getPassword());
+
+        }catch (Exception e){
+            return false;
+        }
+
+    }
+
 }

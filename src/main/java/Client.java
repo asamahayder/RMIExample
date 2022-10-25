@@ -5,8 +5,13 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.Scanner;
 
-public class Client {
 
+
+public class Client{
+
+    static String username = "User1";
+    static String password = "test1";
+    static String authObject = username + ";" + password;
     static Scanner in = new Scanner(System.in);
 
     static State currentState = State.MAIN;
@@ -40,8 +45,6 @@ public class Client {
     }
 
     public static void main(String[] args) throws RemoteException {
-
-
 
         while (currentState != State.OFF){
             switch (currentState){
@@ -82,7 +85,7 @@ public class Client {
 
 
 
-        System.out.println(service.print("test", "printer1"));
+        System.out.println(service.print("test", "printer1", authObject));
 
 
 
@@ -93,7 +96,7 @@ public class Client {
         String config = in.nextLine();
         System.out.println("Please write a config value");
         String value = in.nextLine();
-        String response = service.setConfig(config, value);
+        String response = service.setConfig(config, value, authObject);
         System.out.println("Response from server: ");
         System.out.println(response + "\n");
         currentState = State.MAIN;
@@ -102,7 +105,7 @@ public class Client {
     private static void readConfig() throws RemoteException{
         System.out.println("Please write a config name");
         String config = in.nextLine();
-        String response = service.readConfig(config);
+        String response = service.readConfig(config, authObject);
         System.out.println("Response from server: ");
         System.out.println(response + "\n");
         currentState = State.MAIN;
@@ -111,28 +114,28 @@ public class Client {
     private static void status() throws RemoteException{
         System.out.println("Please write a printer");
         String printer = in.nextLine();
-        String response = service.status(printer);
+        String response = service.status(printer, authObject);
         System.out.println("Response from server: ");
         System.out.println(response + "\n");
         currentState = State.MAIN;
     }
 
     private static void start() throws RemoteException{
-        String response = service.start();
+        String response = service.start(authObject);
         System.out.println("Response from server: ");
         System.out.println(response + "\n");
         currentState = State.MAIN;
     }
 
     private static void stop() throws RemoteException{
-        String response = service.stop();
+        String response = service.stop(authObject);
         System.out.println("Response from server: ");
         System.out.println(response + "\n");
         currentState = State.MAIN;
     }
 
     private static void restart() throws RemoteException{
-        String response = service.restart();
+        String response = service.restart(authObject);
         System.out.println("Response from server: ");
         System.out.println(response + "\n");
         currentState = State.MAIN;
@@ -143,7 +146,7 @@ public class Client {
         String printer = in.nextLine();
         System.out.println("Please write a job number (int)");
         int job = in.nextInt();
-        String response = service.topQueue(printer, job);
+        String response = service.topQueue(printer, job, authObject);
         System.out.println("Response from server: ");
         System.out.println(response + "\n");
         currentState = State.MAIN;
@@ -152,7 +155,7 @@ public class Client {
     private static void queue() throws RemoteException{
         System.out.println("Please write a printer");
         String printer = in.nextLine();
-        String response = service.queue(printer);
+        String response = service.queue(printer, authObject);
         System.out.println("Response from server: ");
         System.out.println(response + "\n");
         currentState = State.MAIN;
@@ -164,7 +167,7 @@ public class Client {
         System.out.println("Please write a printer");
         String printer = in.nextLine();
         System.out.println("Response from server: ");
-        String response = service.print(fileName, printer);
+        String response = service.print(fileName, printer, authObject);
         System.out.println(response + "\n");
         currentState = State.MAIN;
     }

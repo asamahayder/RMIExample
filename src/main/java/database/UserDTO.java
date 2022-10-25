@@ -22,4 +22,16 @@ public class UserDTO {
                 ", salt=" + Arrays.toString(salt) +
                 '}';
     }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public byte[] getSalt() {
+        return salt;
+    }
 }
