@@ -1,16 +1,22 @@
 import database.Database;
+import database.Filer;
 import database.Hasher;
 import database.UserDTO;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.logging.FileHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 public class PrinterServant extends UnicastRemoteObject implements PrinterService {
 
     boolean started;
     ArrayList<Printer> printers;
+    Logger logger = Logger.getLogger(PrinterServant.class.getName());
+    FileHandler fh;
 
     public PrinterServant() throws RemoteException {
         super();
@@ -19,7 +25,16 @@ public class PrinterServant extends UnicastRemoteObject implements PrinterServic
         printers.add(new Printer("b"));
         printers.add(new Printer("c"));
         started = false;
+        try {
+            fh = new FileHandler(Filer.getPath() + "log.log");
+            logger.addHandler(fh);
+            SimpleFormatter simpleFormatter = new SimpleFormatter();
+            fh.setFormatter(simpleFormatter);
 
+            logger.log(Level.INFO, "Logger started");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -180,6 +195,12 @@ public class PrinterServant extends UnicastRemoteObject implements PrinterServic
     }
 
     private boolean isAuthenticated(String authObject) {
+
+        if (authObject == null) {
+            logger.log(Level.WARNING, "authObject was null");
+            return false;
+        }
+
         try{
             Database db = new Database();
 
@@ -188,14 +209,22 @@ public class PrinterServant extends UnicastRemoteObject implements PrinterServic
 
             UserDTO userDTO = db.selectUser(username);
 
-            if (userDTO == null) return false;
+            if (userDTO == null) {
+                logger.log(Level.INFO, "User was not found in database: " + username);
+                return false;
+            }
 
-            return Hasher.hashPassword(password, userDTO.getSalt()).equals(userDTO.getPassword());
+            if (Hasher.hashPassword(password, userDTO.getSalt()).equals(userDTO.getPassword())) {
+                logger.log(Level.INFO, "User has been authenticated: " + username + ";" + password);
+                return true;
+            }
+
+            logger.log(Level.INFO, "User was not authenticated: " + username + ";" + password);
+            return false;
 
         }catch (Exception e){
+            logger.log(Level.WARNING, "Could not connect to database");
             return false;
         }
-
     }
-
 }
