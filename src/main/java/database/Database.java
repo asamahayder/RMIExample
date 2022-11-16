@@ -1,5 +1,6 @@
 package database;
 
+import java.security.NoSuchAlgorithmException;
 import java.sql.*;
 import java.util.Arrays;
 
@@ -26,8 +27,6 @@ public class Database {
         insertUserTable();
         insertConfig();
         insertAccessControl(methods, roles);
-        //selectAllFromUserTable();
-        //selectAllFromConfigTable();
     }
 
     public UserDTO selectUser(String username) {
@@ -165,35 +164,13 @@ public class Database {
             connect();
             connection.setAutoCommit(false);
 
-            helpInsertUser(0, "Alice", "test", 0).execute();        // Alice is admin
-            helpInsertUser(1, "Bob", "test", 2).execute();          // Bob is technician
-            helpInsertUser(2, "Cecilia", "test", 1).execute();      // Cecilia is power user
-            helpInsertUser(3, "David", "test", 3).execute();        // Ordinary user
-            helpInsertUser(4, "Eric", "test", 3).execute();         // Ordinary user
-            helpInsertUser(5, "Fred", "test", 3).execute();         // Ordinary user
-            helpInsertUser(6, "George", "test", 3).execute();       // Ordinary user
-
-            //PreparedStatement stmt = null;
-
-            //for (int i = 0; i < 10; i++) {
-            //    String username = "User" + i;
-            //    byte[] salt = getSalt();
-            //    String password = hashPassword("test" + i, salt);
-
-            //    String sql = "INSERT INTO USERS (ID, NAME, PASSWORD, SALT, ROLE_ID) " +
-            //            "VALUES (" + i + ", '" + username + "', '" + password + "', ?, ?);";
-
-            //    stmt = connection.prepareStatement(sql);
-            //    stmt.setBytes(1, salt);
-            //    int temptRoleID = i;
-            //    if (temptRoleID > 3) {
-            //        temptRoleID -= 3;
-            //    }
-            //    stmt.setInt(2, temptRoleID);
-            //    stmt.executeUpdate();
-            //}
-
-            //stmt.close();
+            helpInsertUser(0, "Alice", 0);        // Alice is admin
+            helpInsertUser(1, "Bob", 2);          // Bob is technician
+            helpInsertUser(2, "Cecilia", 1);      // Cecilia is power user
+            helpInsertUser(3, "David", 3);        // Ordinary user
+            helpInsertUser(4, "Eric", 3);         // Ordinary user
+            helpInsertUser(5, "Fred", 3);         // Ordinary user
+            helpInsertUser(6, "George", 3);       // Ordinary user
 
             connection.commit();
             disconnect();
@@ -208,9 +185,6 @@ public class Database {
             connection.setAutoCommit(false);
 
             PreparedStatement stmt = null;
-
-
-
 
             String sql = "INSERT INTO CONFIG (ID, DESCRIPTION, VALUE) " +
                     "VALUES ("+1+", '" + "testParam" + "', '" + "testString" + "');";
@@ -354,14 +328,14 @@ public class Database {
                 "VALUES (" + whatRole + ", " + whatOperation + ")";
     }
 
-    private static PreparedStatement helpInsertUser(int id, String userName, String password, int role_id) {
+    private static void helpInsertUser(int id, String userName, int role_id) throws NoSuchAlgorithmException, SQLException {
         byte[] salt = getSalt();
-        String passwordHash = hashPassword(password, salt);
+        String passwordHash = hashPassword("test", salt);
         String sql = "INSERT INTO USERS (ROLE_ID, OPERATION_ID) " +
                 "VALUES (" + id + ", " + userName + ", " + passwordHash + ", ? , " + role_id + ")";
-        stmt = connection.prepareStatement(sql);
+        PreparedStatement stmt = connection.prepareStatement(sql);
         stmt.setBytes(1, salt);
-        return stmt;
+        stmt.execute();
     }
 
     private static void selectAllFromUserTable() {
