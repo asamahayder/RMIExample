@@ -1,7 +1,4 @@
-import database.Database;
-import database.Filer;
-import database.Hasher;
-import database.UserDTO;
+import database.*;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
@@ -192,6 +189,63 @@ public class PrinterServant extends UnicastRemoteObject implements PrinterServic
         db.setConfig(parameter, value);
 
         return "Config updated!";
+    }
+
+    private boolean isAuthorized(String authObject, String methodName){
+
+        if (authObject == null) {
+            logger.log(Level.WARNING, "authObject was null");
+            return false;
+        }
+
+        if (methodName == null) {
+            logger.log(Level.WARNING, "method was null");
+            return false;
+        }
+
+        try{
+            Database db = new Database();
+
+            //First step is to get which authorization method to use
+            ConfigDTO authorizationMethod = db.getConfig("authorization_method");
+            String username = authObject.split(";")[0];
+
+            UserDTO userDTO = db.selectUser(username);
+
+
+            if (authorizationMethod.getDescription().equals("list_based")){
+                //Getting all rows from userOperations that has userId
+                ArrayList<UserOperationDTO> userOperationDTOS = new ArrayList<>(); //TODO: get this from the db!!!
+
+                for (UserOperationDTO userOperationDTO : userOperationDTOS) {
+
+                    OperationDTO operationDTO = new OperationDTO(0, "placeholder"); //TODO: get this from the db!!
+
+                    if (operationDTO.getOperation().equals(methodName)) return true;
+                }
+
+                return false;
+
+            }else if (authorizationMethod.getDescription().equals("role_based")){
+                //Getting allowed operations from user role
+                ArrayList<RoleOperationDTO> roleOperationDTOS = new ArrayList<>(); //TODO: get this from the db!!
+
+
+
+                //checking if current operation is in list
+
+            }
+
+
+
+
+
+            return false;
+
+        }catch (Exception e){
+            logger.log(Level.WARNING, "Could not connect to database");
+            return false;
+        }
     }
 
     private boolean isAuthenticated(String authObject) {

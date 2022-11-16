@@ -6,12 +6,14 @@ public class UserDTO {
 
     private String name;
     private String password;
+    private int roleId;
     private byte[] salt;
 
-    public UserDTO(String name, String password, byte[] salt) {
+    public UserDTO(String name, String password, int roleId, byte[] salt) {
         this.name = name;
         this.password = password;
         this.salt = salt;
+        this.roleId = roleId;
     }
 
     @Override
@@ -20,6 +22,7 @@ public class UserDTO {
                 "name='" + name + '\'' +
                 ", password='" + password + '\'' +
                 ", salt=" + Arrays.toString(salt) +
+                ", role=" + roleId +
                 '}';
     }
 
@@ -34,4 +37,6 @@ public class UserDTO {
     public byte[] getSalt() {
         return salt;
     }
+
+    public int getRole() { return roleId; }
 }

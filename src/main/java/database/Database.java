@@ -9,6 +9,7 @@ import static database.Filer.getPath;
 import static database.Hasher.getSalt;
 import static database.Hasher.hashPassword;
 
+
 public class Database {
 
     private static Connection connection = null;
