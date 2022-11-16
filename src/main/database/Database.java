@@ -1,7 +1,12 @@
-package main.database;
+package database;
 
 import java.sql.*;
 import java.util.Arrays;
+
+import static database.Filer.deleteDatabaseFile;
+import static database.Filer.getPath;
+import static database.Hasher.getSalt;
+import static database.Hasher.hashPassword;
 
 public class Database {
 
@@ -12,13 +17,17 @@ public class Database {
     }
 
     public static void createDatabase() {
-        Filer.deleteDatabaseFile();
+        String[] methods = new String[] {"print", "queue", "topQueue", "start", "stop", "restart", "status", "readConfig", "setConfig"};
+        String[] roles = new String[] {"Admin", "Power User", "Technician", "User"};
+
+        deleteDatabaseFile();
         createUserTable();
         createConfigTable();
         insertUserTable();
         insertConfig();
-        selectAllFromUserTable();
-        selectAllFromConfigTable();
+        insertAccessControl(methods, roles);
+        //selectAllFromUserTable();
+        //selectAllFromConfigTable();
     }
 
     public UserDTO selectUser(String username) {
@@ -90,7 +99,7 @@ public class Database {
 
     private static void connect() {
         try {
-            String path = Filer.getPath();
+            String path = getPath();
             String url = "jdbc:sqlite:" + path + "database.db";
 
             connection = DriverManager.getConnection(url);
@@ -116,10 +125,11 @@ public class Database {
             Statement stmt = connection.createStatement();
 
             String sql = "CREATE TABLE USERS " +
-                    "(ID INT PRIMARY KEY NOT NULL, " +
+                    "(USER_ID INT PRIMARY KEY NOT NULL, " +
                     "NAME TEXT NOT NULL, " +
                     "PASSWORD CHAR(512), " +
-                    "SALT BLOB)";
+                    "SALT BLOB, " +
+                    "ROLE_ID INT NOT NULL)";
 
             stmt.executeUpdate(sql);
             stmt.close();
@@ -159,14 +169,19 @@ public class Database {
 
             for (int i = 0; i < 10; i++) {
                 String username = "User" + i;
-                byte[] salt = Hasher.getSalt();
-                String password = Hasher.hashPassword("test" + i, salt);
+                byte[] salt = getSalt();
+                String password = hashPassword("test" + i, salt);
 
-                String sql = "INSERT INTO USERS (ID, NAME, PASSWORD, SALT) " +
-                        "VALUES (" + i + ", '" + username + "', '" + password + "', ?);";
+                String sql = "INSERT INTO USERS (ID, NAME, PASSWORD, SALT, ROLE_ID) " +
+                        "VALUES (" + i + ", '" + username + "', '" + password + "', ?, ?);";
 
                 stmt = connection.prepareStatement(sql);
                 stmt.setBytes(1, salt);
+                int temptRoleID = i;
+                if (temptRoleID > 3) {
+                    temptRoleID -= 3;
+                }
+                stmt.setInt(2, temptRoleID);
                 stmt.executeUpdate();
             }
 
@@ -201,6 +216,94 @@ public class Database {
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
+    }
+
+    private static void createAccessControlTables() {
+        try {
+            connect();
+
+            // OPERATION_ID, METHOD
+            String operationsTable = "CREATE TABLE OPERATIONS " +
+                    "(OPERATION_ID INT PRIMARY KEY NOT NULL, " +
+                    "METHOD TEXT NOT NULL)";
+
+            // USER_ID, OPERATION_ID
+            String userOperationsTable = "CREATE TABLE USER_OPERATIONS " +
+                    "(USER_ID INT NOT NULL, " +
+                    "OPERATION_ID INT NOT NULL)";
+
+            // ROLE_ID, ROLE
+            String rolesTable = "CREATE TABLE ROLES " +
+                    "(ROLE_ID INT PRIMARY KEY NOT NULL, " +
+                    "ROLE TEXT NOT NULL)";
+
+            // ROLE_ID, OPERATION_ID
+            String roleOperationsTable = "CREATE TABLE ROLE_OPERATIONS " +
+                    "(ROLE_ID INT NOT NULL, " +
+                    "OPERATION_ID INT NOT NULL)";
+
+            // ROLE_ID, ROLE_CHILD_ID
+            String roleTreeTable = "CREATE TABLE ROLE_TREE " +
+                    "(ROLE_ID INT NOT NULL, " +
+                    "ROLE_CHILD_ID, INT)";
+
+            connection.prepareStatement(operationsTable).execute();
+            connection.prepareStatement(userOperationsTable).execute();
+            connection.prepareStatement(rolesTable).execute();
+            connection.prepareStatement(roleOperationsTable).execute();
+            connection.prepareStatement(roleTreeTable).execute();
+
+            connection.commit();
+
+            disconnect();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    private static void insertAccessControl(String[] methods, String[] roles) {
+        try {
+            connect();
+
+            // INSERT ACCESS CONTROL STUFF
+            for (int i = 0; i < methods.length; i++) {
+                String sql = "INSERT INTO OPERATIONS (OPERATION_ID, OPERATION) VALUES (" + i + ", ." + methods[i] + "')";
+                connection.prepareStatement(sql).execute();
+            }
+
+            // INSERT ROLE BASED ACCESS CONTROL STUFF
+            for (int i = 0; i < roles.length; i++) {
+                String sql = "INSERT INTO ROLES (ROLE_ID, ROLE) VALUES (" + i + ", '" + roles[i] + "')";
+                connection.prepareStatement(sql).execute();
+            }
+
+            // ROLE IDS = (0 = admin, 1 = power user, 2 = technician, 3 = user)
+            // OPERATION IDS = (0 = print, 1 = queue, 2 = topQueue, 3 = start, 4 = stop, 5 = restart, 6 = status, 7 = readConfig, 8 = setConfig)
+
+            // USER OPERATION
+
+            // ROLE OPERATION
+
+
+            // ROLE TREE
+            connection.prepareStatement(helpInsertRoleTree(0, 1)).execute();
+            connection.prepareStatement(helpInsertRoleTree(0, 2)).execute();
+            connection.prepareStatement(helpInsertRoleTree(1, 3)).execute();
+
+            disconnect();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    private static String helpInsertRoleTree(int whatRoleParent, int whatRoleChild) {
+        return "INSERT INTO ROLE_TREE (ROLE_ID, ROLE_CHILD_ID) " +
+                "VALUES (" + whatRoleParent + ", " + whatRoleChild + ")";
+    }
+
+    private static String helpInsertRoleOperations(int whatRole, int whatOperation) {
+        return "INSERT INTO ROLE_OPERATIONS (ROLE_ID, OPERATION_ID) " +
+                "VALUES (" + whatRole + ", " + whatOperation + ")";
     }
 
     private static void selectAllFromUserTable() {
