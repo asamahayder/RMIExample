@@ -1,6 +1,4 @@
-package main;
-
-import main.database.Database;
+import database.Database;
 
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;

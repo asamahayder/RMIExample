@@ -1,4 +1,4 @@
-package main.database;
+package database;
 
 public class UserOperationDTO {
     private int userId;

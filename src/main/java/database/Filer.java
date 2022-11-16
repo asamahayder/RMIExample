@@ -1,4 +1,4 @@
-package main.database;
+package database;
 
 import java.io.File;
 import java.nio.file.Path;

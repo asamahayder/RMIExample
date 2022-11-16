@@ -1,4 +1,4 @@
-package main.database;
+package database;
 
 public class RoleTreeDTO {
 
