@@ -165,27 +165,35 @@ public class Database {
             connect();
             connection.setAutoCommit(false);
 
-            PreparedStatement stmt = null;
+            helpInsertUser(0, "Alice", "test", 0).execute();        // Alice is admin
+            helpInsertUser(1, "Bob", "test", 2).execute();          // Bob is technician
+            helpInsertUser(2, "Cecilia", "test", 1).execute();      // Cecilia is power user
+            helpInsertUser(3, "David", "test", 3).execute();        // Ordinary user
+            helpInsertUser(4, "Eric", "test", 3).execute();         // Ordinary user
+            helpInsertUser(5, "Fred", "test", 3).execute();         // Ordinary user
+            helpInsertUser(6, "George", "test", 3).execute();       // Ordinary user
 
-            for (int i = 0; i < 10; i++) {
-                String username = "User" + i;
-                byte[] salt = getSalt();
-                String password = hashPassword("test" + i, salt);
+            //PreparedStatement stmt = null;
 
-                String sql = "INSERT INTO USERS (ID, NAME, PASSWORD, SALT, ROLE_ID) " +
-                        "VALUES (" + i + ", '" + username + "', '" + password + "', ?, ?);";
+            //for (int i = 0; i < 10; i++) {
+            //    String username = "User" + i;
+            //    byte[] salt = getSalt();
+            //    String password = hashPassword("test" + i, salt);
 
-                stmt = connection.prepareStatement(sql);
-                stmt.setBytes(1, salt);
-                int temptRoleID = i;
-                if (temptRoleID > 3) {
-                    temptRoleID -= 3;
-                }
-                stmt.setInt(2, temptRoleID);
-                stmt.executeUpdate();
-            }
+            //    String sql = "INSERT INTO USERS (ID, NAME, PASSWORD, SALT, ROLE_ID) " +
+            //            "VALUES (" + i + ", '" + username + "', '" + password + "', ?, ?);";
 
-            stmt.close();
+            //    stmt = connection.prepareStatement(sql);
+            //    stmt.setBytes(1, salt);
+            //    int temptRoleID = i;
+            //    if (temptRoleID > 3) {
+            //        temptRoleID -= 3;
+            //    }
+            //    stmt.setInt(2, temptRoleID);
+            //    stmt.executeUpdate();
+            //}
+
+            //stmt.close();
 
             connection.commit();
             disconnect();
@@ -281,9 +289,44 @@ public class Database {
             // OPERATION IDS = (0 = print, 1 = queue, 2 = topQueue, 3 = start, 4 = stop, 5 = restart, 6 = status, 7 = readConfig, 8 = setConfig)
 
             // USER OPERATION
+            // USER IDS = (0 = Alice, 1 = Bob, 2 = Cecilia, 3-6 users)
+            
+            // Regular users can print and queue
+            for (int i = 3 ; i <= 6 ; i++) {
+                connection.prepareStatement(helpInsertUserOperations(i, 0)).execute();  // user can print
+                connection.prepareStatement(helpInsertUserOperations(i, 1)).execute();  // user can queue
+            }
+
+            // Bob can start, stop, restart, status, readConfig, setConfig
+            connection.prepareStatement(helpInsertUserOperations(1, 3)).execute();
+            connection.prepareStatement(helpInsertUserOperations(1, 4)).execute();
+            connection.prepareStatement(helpInsertUserOperations(1, 5)).execute();
+            connection.prepareStatement(helpInsertUserOperations(1, 6)).execute();
+            connection.prepareStatement(helpInsertUserOperations(1, 7)).execute();
+            connection.prepareStatement(helpInsertUserOperations(1, 8)).execute();
+
+            // Cecilia can print, queue, topQueue and restart
+            connection.prepareStatement(helpInsertUserOperations(2, 0)).execute();
+            connection.prepareStatement(helpInsertUserOperations(2, 1)).execute();
+            connection.prepareStatement(helpInsertUserOperations(2, 2)).execute();
+            connection.prepareStatement(helpInsertUserOperations(2, 5)).execute();
+
+            // Alice can everything
+            for (int i = 0 ; i < methods.length ; i++) {
+                connection.prepareStatement(helpInsertUserOperations(0, i)).execute();
+            }
 
             // ROLE OPERATION
-
+            connection.prepareStatement(helpInsertRoleOperations(3, 0)).execute();  // user can print
+            connection.prepareStatement(helpInsertRoleOperations(3, 1)).execute();  // user can queue
+            connection.prepareStatement(helpInsertRoleOperations(1, 2)).execute();  // power user can topQueue
+            connection.prepareStatement(helpInsertRoleOperations(1, 5)).execute();  // power user can restart
+            connection.prepareStatement(helpInsertRoleOperations(2, 3)).execute();  // technician can start
+            connection.prepareStatement(helpInsertRoleOperations(2, 4)).execute();  // technician can stop
+            connection.prepareStatement(helpInsertRoleOperations(2, 5)).execute();  // technician can restart
+            connection.prepareStatement(helpInsertRoleOperations(2, 6)).execute();  // technician can status
+            connection.prepareStatement(helpInsertRoleOperations(2, 7)).execute();  // technician can readConfig
+            connection.prepareStatement(helpInsertRoleOperations(2, 8)).execute();  // technician can setConfig
 
             // ROLE TREE
             connection.prepareStatement(helpInsertRoleTree(0, 1)).execute();
@@ -304,6 +347,21 @@ public class Database {
     private static String helpInsertRoleOperations(int whatRole, int whatOperation) {
         return "INSERT INTO ROLE_OPERATIONS (ROLE_ID, OPERATION_ID) " +
                 "VALUES (" + whatRole + ", " + whatOperation + ")";
+    }
+
+    private static String helpInsertUserOperations(int whatRole, int whatOperation) {
+        return "INSERT INTO USER_OPERATIONS (USER_ID, OPERATION_ID) " +
+                "VALUES (" + whatRole + ", " + whatOperation + ")";
+    }
+
+    private static PreparedStatement helpInsertUser(int id, String userName, String password, int role_id) {
+        byte[] salt = getSalt();
+        String passwordHash = hashPassword(password, salt);
+        String sql = "INSERT INTO USERS (ROLE_ID, OPERATION_ID) " +
+                "VALUES (" + id + ", " + userName + ", " + passwordHash + ", ? , " + role_id + ")";
+        stmt = connection.prepareStatement(sql);
+        stmt.setBytes(1, salt);
+        return stmt;
     }
 
     private static void selectAllFromUserTable() {
