@@ -1,12 +1,7 @@
-package database;
+package main.database;
 
 import java.sql.*;
 import java.util.Arrays;
-
-import static database.Filer.deleteDatabaseFile;
-import static database.Filer.getPath;
-import static database.Hasher.getSalt;
-import static database.Hasher.hashPassword;
 
 public class Database {
 
@@ -17,7 +12,7 @@ public class Database {
     }
 
     public static void createDatabase() {
-        deleteDatabaseFile();
+        Filer.deleteDatabaseFile();
         createUserTable();
         createConfigTable();
         insertUserTable();
@@ -95,7 +90,7 @@ public class Database {
 
     private static void connect() {
         try {
-            String path = getPath();
+            String path = Filer.getPath();
             String url = "jdbc:sqlite:" + path + "database.db";
 
             connection = DriverManager.getConnection(url);
@@ -164,8 +159,8 @@ public class Database {
 
             for (int i = 0; i < 10; i++) {
                 String username = "User" + i;
-                byte[] salt = getSalt();
-                String password = hashPassword("test" + i, salt);
+                byte[] salt = Hasher.getSalt();
+                String password = Hasher.hashPassword("test" + i, salt);
 
                 String sql = "INSERT INTO USERS (ID, NAME, PASSWORD, SALT) " +
                         "VALUES (" + i + ", '" + username + "', '" + password + "', ?);";

@@ -1,4 +1,4 @@
-package database;
+package main.database;
 
 public class ConfigDTO {
 
