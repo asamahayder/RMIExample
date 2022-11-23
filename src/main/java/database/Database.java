@@ -52,7 +52,7 @@ public class Database {
             connection.prepareStatement(helpInsertUserOperations(6, 7)).execute();
             connection.prepareStatement(helpInsertUserOperations(6, 8)).execute();
 
-            String sql3 = "INSERT INTO ROLES (ROLE_ID, ROLE) VALUES (4, USER_TECHNICIAN)";
+            String sql3 = "INSERT INTO ROLES (ROLE_ID, ROLE) VALUES (4, 'USER_TECHNICIAN')";
             connection.prepareStatement(sql3).execute();
             connection.prepareStatement(helpInsertRoleTree(4, 2)).execute();
             connection.prepareStatement(helpInsertRoleTree(4, 3)).execute();
@@ -67,7 +67,7 @@ public class Database {
             connection.prepareStatement(helpInsertUserOperations(7, 0)).execute();  // user can print
             connection.prepareStatement(helpInsertUserOperations(7, 1)).execute();  // user can queue
 
-             connection.prepareStatement(helpInsertUserOperations(8, 0)).execute();
+            connection.prepareStatement(helpInsertUserOperations(8, 0)).execute();
             connection.prepareStatement(helpInsertUserOperations(8, 1)).execute();
             connection.prepareStatement(helpInsertUserOperations(8, 2)).execute();
             connection.prepareStatement(helpInsertUserOperations(8, 5)).execute();
