@@ -27,6 +27,7 @@ public class Database {
         deleteDatabaseFile();
         createUserTable();
         createConfigTable();
+        createAccessControlTables();
         insertUserTable();
         insertConfig();
         insertAccessControl(methods, roles);
@@ -64,7 +65,10 @@ public class Database {
             connect();
 
             PreparedStatement pStmt;
-            String sql = "SELECT * FROM OPERATIONS WHERE USER_ID = ?";
+            String sql =
+                    "SELECT USER_OPERATIONS.OPERATION_ID, USER_OPERATIONS.USER_ID, OPERATIONS.METHOD FROM USER_OPERATIONS " +
+                    "INNER JOIN OPERATIONS ON USER_OPERATIONS.OPERATION_ID = OPERATIONS.OPERATION_ID " +
+                    "WHERE USER_OPERATIONS.USER_ID = ?";
 
             pStmt = connection.prepareStatement(sql);
             pStmt.setInt(1, user.getId());
@@ -86,6 +90,59 @@ public class Database {
         }
 
         return null;
+    }
+
+    public List<OperationDTO> selectRoleOperations(UserDTO user) {
+        try {
+            connect();
+
+            List<OperationDTO> operationDTOS = getRoleOperationRecursive(user.getRole());
+
+            disconnect();
+
+            return operationDTOS;
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+
+        return null;
+    }
+
+    private List<OperationDTO> getRoleOperationRecursive(int roleID) throws SQLException {
+        PreparedStatement pStmt;
+        String sql1 =
+                "SELECT ROLE_OPERATIONS.OPERATION_ID, OPERATIONS.METHOD FROM ROLE_OPERATIONS " +
+                "INNER JOIN OPERATIONS ON ROLE_OPERATIONS.OPERATION_ID = OPERATIONS.OPERATION_ID " +
+                "WHERE ROLE_OPERATIONS.ROLE_ID = ? ";
+
+        pStmt = connection.prepareStatement(sql1);
+        pStmt.setInt(1, roleID);
+        ResultSet rs = pStmt.executeQuery();
+
+        List<OperationDTO> listOfOperations = new ArrayList<>();
+        while (rs.next()) {
+            int operationID = rs.getInt("OPERATION_ID");
+            String methodName = rs.getString("METHOD");
+
+            OperationDTO operation = new OperationDTO(operationID, methodName);
+            listOfOperations.add(operation);
+        }
+
+        PreparedStatement pStmt2;
+        String sql2 =
+                "SELECT ROLE_CHILD_ID FROM role_tree " +
+                "WHERE role_id = ?";
+
+        pStmt2 = connection.prepareStatement(sql2);
+        pStmt2.setInt(1, roleID);
+
+        ResultSet rs2 = pStmt2.executeQuery();
+
+        while (rs2.next()) {
+            listOfOperations.addAll(getRoleOperationRecursive(rs2.getInt("ROLE_CHILD_ID")));
+        }
+
+        return listOfOperations;
     }
 
     public ConfigDTO getConfig(String parameter) {
@@ -283,7 +340,7 @@ public class Database {
 
             // INSERT ACCESS CONTROL STUFF
             for (int i = 0; i < methods.length; i++) {
-                String sql = "INSERT INTO OPERATIONS (OPERATION_ID, OPERATION) VALUES (" + i + ", ." + methods[i] + "')";
+                String sql = "INSERT INTO OPERATIONS (OPERATION_ID, METHOD) VALUES (" + i + ", '" + methods[i] + "')";
                 connection.prepareStatement(sql).execute();
             }
 
@@ -365,8 +422,8 @@ public class Database {
     private static void helpInsertUser(int id, String userName, int role_id) throws NoSuchAlgorithmException, SQLException {
         byte[] salt = getSalt();
         String passwordHash = hashPassword("test", salt);
-        String sql = "INSERT INTO USERS (USER_ID, NAME, PASSWORD, ROLE_ID) " +
-                "VALUES (" + id + ", " + userName + ", " + passwordHash + ", ? , " + role_id + ")";
+        String sql = "INSERT INTO USERS (USER_ID, NAME, PASSWORD, SALT, ROLE_ID) " +
+                "VALUES (" + id + ", '" + userName + "', '" + passwordHash + "', ? , " + role_id + ")";
         PreparedStatement stmt = connection.prepareStatement(sql);
         stmt.setBytes(1, salt);
         stmt.execute();
