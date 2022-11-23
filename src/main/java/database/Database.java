@@ -33,6 +33,49 @@ public class Database {
         insertAccessControl(methods, roles);
     }
 
+    public void makeChangesToUsers() {
+        try {
+            connect();
+
+            // DELETE BOB
+            String sql1 = "DELETE FROM USERS WHERE USER_ID = 1";
+            connection.prepareStatement(sql1).execute();
+
+            String sql2 = "DELETE FROM USER_OPERATIONS WHERE USER_ID = 1";
+            connection.prepareStatement(sql2).execute();
+
+            // GIVE GEORGE NEW ROLE AND SAME PERMISSIONS AS BOB
+            connection.prepareStatement(helpInsertUserOperations(6, 3)).execute();
+            connection.prepareStatement(helpInsertUserOperations(6, 4)).execute();
+            connection.prepareStatement(helpInsertUserOperations(6, 5)).execute();
+            connection.prepareStatement(helpInsertUserOperations(6, 6)).execute();
+            connection.prepareStatement(helpInsertUserOperations(6, 7)).execute();
+            connection.prepareStatement(helpInsertUserOperations(6, 8)).execute();
+
+            String sql3 = "INSERT INTO ROLES (ROLE_ID, ROLE) VALUES (4, USER_TECHNICIAN)";
+            connection.prepareStatement(sql3).execute();
+            connection.prepareStatement(helpInsertRoleTree(4, 2)).execute();
+            connection.prepareStatement(helpInsertRoleTree(4, 3)).execute();
+
+            // INSERT NEW USERS HENRY (USER) & IDA (POWER USER)
+            helpInsertUser(7, "Henry", 3);
+            helpInsertUser(8, "Ida", 1);
+
+            connection.prepareStatement(helpInsertUserOperations(7, 0)).execute();  // user can print
+            connection.prepareStatement(helpInsertUserOperations(7, 1)).execute();  // user can queue
+
+             connection.prepareStatement(helpInsertUserOperations(8, 0)).execute();
+            connection.prepareStatement(helpInsertUserOperations(8, 1)).execute();
+            connection.prepareStatement(helpInsertUserOperations(8, 2)).execute();
+            connection.prepareStatement(helpInsertUserOperations(8, 5)).execute();
+
+            connection.commit();
+            disconnect();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
     public UserDTO selectUser(String username) {
         try {
             connect();
@@ -415,9 +458,9 @@ public class Database {
                 "VALUES (" + whatRole + ", " + whatOperation + ")";
     }
 
-    private static String helpInsertUserOperations(int whatRole, int whatOperation) {
+    private static String helpInsertUserOperations(int userId, int whatOperation) {
         return "INSERT INTO USER_OPERATIONS (USER_ID, OPERATION_ID) " +
-                "VALUES (" + whatRole + ", " + whatOperation + ")";
+                "VALUES (" + userId + ", " + whatOperation + ")";
     }
 
     private static void helpInsertUser(int id, String userName, int role_id) throws NoSuchAlgorithmException, SQLException {
