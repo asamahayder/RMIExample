@@ -21,6 +21,8 @@ public interface PrinterService extends Remote {
 
     String setConfig(String parameter, String value, String authObject) throws RemoteException;
 
+    String makeChanges(String authObject) throws RemoteException;
+
 
 
 

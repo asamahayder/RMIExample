@@ -40,7 +40,8 @@ public class Client{
         RESTART,
         STATUS,
         READCONFIG,
-        SETCONFIG
+        SETCONFIG,
+        MAKECHANGES
     }
 
     public static void main(String[] args) throws RemoteException {
@@ -79,6 +80,9 @@ public class Client{
                 case SETCONFIG:
                     setConfig();
                     break;
+                case MAKECHANGES:
+                    makeChanges();
+                    break;
             }
         }
 
@@ -88,6 +92,14 @@ public class Client{
 
 
 
+    }
+
+    private static void makeChanges() throws RemoteException{
+        System.out.println("Making database changes to simulate changes in the organisation");
+        String response = service.makeChanges(authObject);
+        System.out.println("Response from server: ");
+        System.out.println(response + "\n");
+        currentState = State.MAIN;
     }
 
     private static void setConfig() throws RemoteException{
@@ -183,6 +195,7 @@ public class Client{
         System.out.print("7: status - ");
         System.out.print("8: readConfig - ");
         System.out.print("9: setConfig - ");
+        System.out.println("10: makeChanges - ");
         System.out.print("0: turn off client\n");
 
         String choice = in.nextLine();
@@ -214,6 +227,9 @@ public class Client{
                 break;
             case "9":
                 currentState = State.SETCONFIG;
+                break;
+            case "10":
+                currentState = State.MAKECHANGES;
                 break;
             case "0":
                 currentState = State.OFF;

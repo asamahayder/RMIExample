@@ -205,6 +205,24 @@ public class PrinterServant extends UnicastRemoteObject implements PrinterServic
         return "Config updated!";
     }
 
+    @Override
+    public String makeChanges(String authObject) throws RemoteException {
+        if (!isAuthenticated(authObject)) return "Not authenticated!";
+        if (!isAuthorized(authObject, "makeChanges")) return "Not authorized!";
+        if (!started) return "Printer server not started.";
+
+        Database db = new Database();
+        try{
+            db.makeChangesToUsers();
+        }catch (Exception e){
+
+        }
+
+
+        return
+
+    }
+
     private boolean isAuthorized(String authObject, String methodName){
 
         if (authObject == null) {
