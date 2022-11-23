@@ -36,7 +36,7 @@ public class Database {
     public boolean makeChangesToUsers() {
         try {
             connect();
-
+            connection.setAutoCommit(false);
             // DELETE BOB
             String sql1 = "DELETE FROM USERS WHERE USER_ID = 1";
             connection.prepareStatement(sql1).execute();
@@ -52,12 +52,12 @@ public class Database {
             connection.prepareStatement(helpInsertUserOperations(6, 7)).execute();
             connection.prepareStatement(helpInsertUserOperations(6, 8)).execute();
 
-            String sql3 = "INSERT INTO ROLES (ROLE_ID, ROLE) VALUES (4, USER_TECHNICIAN)";
+            String sql3 = "INSERT INTO ROLES (ROLE_ID, ROLE) VALUES (5, 'USER_TECHNICIAN')";
             connection.prepareStatement(sql3).execute();
-            connection.prepareStatement(helpInsertRoleTree(4, 2)).execute();
-            connection.prepareStatement(helpInsertRoleTree(4, 3)).execute();
+            connection.prepareStatement(helpInsertRoleTree(5, 2)).execute();
+            connection.prepareStatement(helpInsertRoleTree(5, 3)).execute();
 
-            String sql4 = "UPDATE USERS SET ROLE_ID = 4 WHERE USER_ID = 6";
+            String sql4 = "UPDATE USERS SET ROLE_ID = 5 WHERE USER_ID = 6";
             connection.prepareStatement(sql4).execute();
 
             // INSERT NEW USERS HENRY (USER) & IDA (POWER USER)
