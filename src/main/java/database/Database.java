@@ -57,6 +57,9 @@ public class Database {
             connection.prepareStatement(helpInsertRoleTree(4, 2)).execute();
             connection.prepareStatement(helpInsertRoleTree(4, 3)).execute();
 
+            String sql4 = "UPDATE USERS SET ROLE_ID = 4 WHERE USER_ID = 6";
+            connection.prepareStatement(sql4).execute();
+
             // INSERT NEW USERS HENRY (USER) & IDA (POWER USER)
             helpInsertUser(7, "Henry", 3);
             helpInsertUser(8, "Ida", 1);
