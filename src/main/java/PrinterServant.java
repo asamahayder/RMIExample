@@ -207,7 +207,7 @@ public class PrinterServant extends UnicastRemoteObject implements PrinterServic
 
     @Override
     public String makeChanges(String authObject) throws RemoteException {
-        if (!isAuthenticated(authObject)) return "Not authenticated!";
+        if (!isAuthenticated(authObject, "makeChanges")) return "Not authenticated!";
         if (!isAuthorized(authObject, "makeChanges")) return "Not authorized!";
         if (!started) return "Printer server not started.";
 
@@ -245,18 +245,26 @@ public class PrinterServant extends UnicastRemoteObject implements PrinterServic
                 List<OperationDTO> operationDTOS = db.selectUserOperations(userDTO);
 
                 for (OperationDTO operationDTO : operationDTOS) {
-                    if (operationDTO.getOperation().equals(methodName)) return true;
+                    if (operationDTO.getOperation().equals(methodName)){
+                        logger.log(Level.INFO, "User " + username + " has been authorized successfully to use " + methodName);
+                        return true;
+                    }
                 }
 
+                logger.log(Level.INFO, "User " + username + " does not have permission to execute " + methodName);
                 return false;
 
             }else{
                 //Getting allowed operations from user role
                 List<OperationDTO> operationDTOS = db.selectRoleOperations(userDTO);
                 for (OperationDTO operationDTO : operationDTOS) {
-                    if (operationDTO.getOperation().equals(methodName)) return true;
+                    if (operationDTO.getOperation().equals(methodName)){
+                        logger.log(Level.INFO, "User " + username + " has been authorized successfully to use " + methodName);
+                        return true;
+                    }
                 }
 
+                logger.log(Level.INFO, "User " + username + " does not have permission to execute " + methodName);
                 return false;
             }
 
