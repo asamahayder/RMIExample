@@ -226,21 +226,15 @@ public class PrinterServant extends UnicastRemoteObject implements PrinterServic
 
                 return false;
 
-            }else if (authorizationMethod.getDescription().equals("role_based")){
+            }else{
                 //Getting allowed operations from user role
-                ArrayList<RoleOperationDTO> roleOperationDTOS = new ArrayList<>(); //TODO: get this from the db!!
+                ArrayList<OperationDTO> operationDTOS = new ArrayList<>(); //TODO: get this from the db!!
+                for (OperationDTO operationDTO : operationDTOS) {
+                    if (operationDTO.getOperation().equals(methodName)) return true;
+                }
 
-
-
-                //checking if current operation is in list
-
+                return false;
             }
-
-
-
-
-
-            return false;
 
         }catch (Exception e){
             logger.log(Level.WARNING, "Could not connect to database");
