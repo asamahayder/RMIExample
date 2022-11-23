@@ -2,7 +2,9 @@ package database;
 
 import java.security.NoSuchAlgorithmException;
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import static database.Filer.deleteDatabaseFile;
 import static database.Filer.getPath;
@@ -40,14 +42,45 @@ public class Database {
             ResultSet rs = stmt.executeQuery(sql);
 
             if (rs.next()) {
+                int id = rs.getInt("USER_ID");
                 String name = rs.getString("NAME");
                 String password = rs.getString("PASSWORD");
+                int roleID = rs.getInt("ROLE_ID");
                 byte[] salt = rs.getBytes("SALT");
 
                 disconnect();
-                return new UserDTO(name, password, salt);
+                return new UserDTO(id, name, password, roleID, salt);
             }
             disconnect();
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
+
+        return null;
+    }
+
+    public List<OperationDTO> selectUserOperations(UserDTO user) {
+        try {
+            connect();
+
+            PreparedStatement pStmt;
+            String sql = "SELECT * FROM OPERATIONS WHERE USER_ID = ?";
+
+            pStmt = connection.prepareStatement(sql);
+            pStmt.setInt(1, user.getId());
+
+            ResultSet rs = pStmt.executeQuery();
+
+            List<OperationDTO> listOfOperations = new ArrayList<>();
+            while (rs.next()) {
+                int id = rs.getInt("OPERATION_ID");
+                String methodName = rs.getString("METHOD");
+                OperationDTO operation = new OperationDTO(id, methodName);
+                listOfOperations.add(operation);
+            }
+
+            disconnect();
+            return listOfOperations;
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
@@ -332,7 +365,7 @@ public class Database {
     private static void helpInsertUser(int id, String userName, int role_id) throws NoSuchAlgorithmException, SQLException {
         byte[] salt = getSalt();
         String passwordHash = hashPassword("test", salt);
-        String sql = "INSERT INTO USERS (ROLE_ID, OPERATION_ID) " +
+        String sql = "INSERT INTO USERS (USER_ID, NAME, PASSWORD, ROLE_ID) " +
                 "VALUES (" + id + ", " + userName + ", " + passwordHash + ", ? , " + role_id + ")";
         PreparedStatement stmt = connection.prepareStatement(sql);
         stmt.setBytes(1, salt);
