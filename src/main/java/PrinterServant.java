@@ -38,6 +38,7 @@ public class PrinterServant extends UnicastRemoteObject implements PrinterServic
     @Override
     public String print(String fileName, String printer, String authObject) throws RemoteException {
         if (!isAuthenticated(authObject)) return "Not authenticated!";
+        if (!isAuthorized(authObject, "print")) return "Not authorized!";
         if (!started) return "Printer server not started.";
 
         boolean printerFound = false;
@@ -60,6 +61,7 @@ public class PrinterServant extends UnicastRemoteObject implements PrinterServic
     @Override
     public String queue(String printer, String authObject) throws RemoteException {
         if (!isAuthenticated(authObject)) return "Not authenticated!";
+        if (!isAuthorized(authObject, "queue")) return "Not authorized!";
         if (!started) return "Printer server not started.";
         boolean printerFound = false;
 
@@ -86,6 +88,7 @@ public class PrinterServant extends UnicastRemoteObject implements PrinterServic
     @Override
     public String topQueue(String printer, int job, String authObject) throws RemoteException {
         if (!isAuthenticated(authObject)) return "Not authenticated!";
+        if (!isAuthorized(authObject, "topQueue")) return "Not authorized!";
         if (!started) return "Printer server not started.";
         boolean printerFound = false;
         boolean jobFound = false;
@@ -108,6 +111,7 @@ public class PrinterServant extends UnicastRemoteObject implements PrinterServic
     @Override
     public String start(String authObject) throws RemoteException {
         if (!isAuthenticated(authObject)) return "Not authenticated!";
+        if (!isAuthorized(authObject, "start")) return "Not authorized!";
         started = true;
 
         StringBuilder builder = new StringBuilder();
@@ -125,6 +129,7 @@ public class PrinterServant extends UnicastRemoteObject implements PrinterServic
     @Override
     public String stop(String authObject) throws RemoteException {
         if (!isAuthenticated(authObject)) return "Not authenticated!";
+        if (!isAuthorized(authObject, "stop")) return "Not authorized!";
         if (!started) return "Printer server not started.";
         started = false;
 
@@ -139,6 +144,7 @@ public class PrinterServant extends UnicastRemoteObject implements PrinterServic
     @Override
     public String restart(String authObject) throws RemoteException {
         if (!isAuthenticated(authObject)) return "Not authenticated!";
+        if (!isAuthorized(authObject, "restart")) return "Not authorized!";
         if (!started) return "Printer server not started.";
 
         stop(authObject);
@@ -151,6 +157,7 @@ public class PrinterServant extends UnicastRemoteObject implements PrinterServic
     @Override
     public String status(String printer, String authObject) throws RemoteException {
         if (!isAuthenticated(authObject)) return "Not authenticated!";
+        if (!isAuthorized(authObject, "status")) return "Not authorized!";
         if (!started) return "Printer server not started.";
         boolean printerFound = false;
         StringBuilder builder = new StringBuilder();
@@ -172,6 +179,7 @@ public class PrinterServant extends UnicastRemoteObject implements PrinterServic
     @Override
     public String readConfig(String parameter, String authObject) throws RemoteException {
         if (!isAuthenticated(authObject)) return "Not authenticated!";
+        if (!isAuthorized(authObject, "readConfig")) return "Not authorized!";
         if (!started) return "Printer server not started.";
 
         Database db = new Database();
@@ -184,6 +192,7 @@ public class PrinterServant extends UnicastRemoteObject implements PrinterServic
     @Override
     public String setConfig(String parameter, String value, String authObject) throws RemoteException {
         if (!isAuthenticated(authObject)) return "Not authenticated!";
+        if (!isAuthorized(authObject, "setConfig")) return "Not authorized!";
         if (!started) return "Printer server not started.";
 
         Database db = new Database();
@@ -212,7 +221,6 @@ public class PrinterServant extends UnicastRemoteObject implements PrinterServic
             String username = authObject.split(";")[0];
 
             UserDTO userDTO = db.selectUser(username);
-
 
             if (authorizationMethod.getDescription().equals("list_based")){
                 //Getting all rows from userOperations that has userId

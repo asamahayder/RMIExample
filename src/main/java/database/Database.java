@@ -277,8 +277,9 @@ public class Database {
 
             PreparedStatement stmt = null;
 
-            String sql = "INSERT INTO CONFIG (ID, DESCRIPTION, VALUE) " +
-                    "VALUES ("+1+", '" + "testParam" + "', '" + "testString" + "');";
+            String sql = "INSERT INTO CONFIG (ID, DESCRIPTION, VALUE) VALUES" +
+                    "("+1+", '" + "testParam" + "', '" + "testString" + "');" +
+                    "("+2+", '" + "authorization_method" + "', '" + "list_based" + "');";
 
             stmt = connection.prepareStatement(sql);
             stmt.executeUpdate();
