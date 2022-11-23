@@ -21,7 +21,7 @@ public class Database {
     }
 
     public static void createDatabase() {
-        String[] methods = new String[] {"print", "queue", "topQueue", "start", "stop", "restart", "status", "readConfig", "setConfig"};
+        String[] methods = new String[] {"print", "queue", "topQueue", "start", "stop", "restart", "status", "readConfig", "setConfig", "makeChanges"};
         String[] roles = new String[] {"Admin", "Power User", "Technician", "User"};
 
         deleteDatabaseFile();
@@ -431,6 +431,7 @@ public class Database {
             }
 
             // ROLE OPERATION
+            connection.prepareStatement(helpInsertRoleOperations(0, 9)).execute();  // Can make database changes
             connection.prepareStatement(helpInsertRoleOperations(3, 0)).execute();  // user can print
             connection.prepareStatement(helpInsertRoleOperations(3, 1)).execute();  // user can queue
             connection.prepareStatement(helpInsertRoleOperations(1, 2)).execute();  // power user can topQueue
