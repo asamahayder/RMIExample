@@ -183,10 +183,14 @@ public class PrinterServant extends UnicastRemoteObject implements PrinterServic
         if (!started) return "Printer server not started.";
 
         Database db = new Database();
-        String value = db.getConfig(parameter).getDescription();
+        ConfigDTO configDTO = db.getConfig(parameter);
+        if (configDTO != null){
+            String value = configDTO.getDescription();
+            return value;
+        }else{
+            return "Value not found!!";
+        }
 
-        if (value != null) return value;
-        else return "Value not found!!";
     }
 
     @Override
@@ -234,7 +238,7 @@ public class PrinterServant extends UnicastRemoteObject implements PrinterServic
 
             }else{
                 //Getting allowed operations from user role
-                ArrayList<OperationDTO> operationDTOS = new ArrayList<>(); //TODO: get this from the db!!
+                List<OperationDTO> operationDTOS = db.selectRoleOperations(userDTO);
                 for (OperationDTO operationDTO : operationDTOS) {
                     if (operationDTO.getOperation().equals(methodName)) return true;
                 }
