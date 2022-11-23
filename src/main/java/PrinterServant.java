@@ -37,7 +37,7 @@ public class PrinterServant extends UnicastRemoteObject implements PrinterServic
 
     @Override
     public String print(String fileName, String printer, String authObject) throws RemoteException {
-        if (!isAuthenticated(authObject)) return "Not authenticated!";
+        if (!isAuthenticated(authObject, "print")) return "Not authenticated!";
         if (!isAuthorized(authObject, "print")) return "Not authorized!";
         if (!started) return "Printer server not started.";
 
@@ -60,7 +60,7 @@ public class PrinterServant extends UnicastRemoteObject implements PrinterServic
 
     @Override
     public String queue(String printer, String authObject) throws RemoteException {
-        if (!isAuthenticated(authObject)) return "Not authenticated!";
+        if (!isAuthenticated(authObject, "queue")) return "Not authenticated!";
         if (!isAuthorized(authObject, "queue")) return "Not authorized!";
         if (!started) return "Printer server not started.";
         boolean printerFound = false;
@@ -87,7 +87,7 @@ public class PrinterServant extends UnicastRemoteObject implements PrinterServic
 
     @Override
     public String topQueue(String printer, int job, String authObject) throws RemoteException {
-        if (!isAuthenticated(authObject)) return "Not authenticated!";
+        if (!isAuthenticated(authObject, "topQueue")) return "Not authenticated!";
         if (!isAuthorized(authObject, "topQueue")) return "Not authorized!";
         if (!started) return "Printer server not started.";
         boolean printerFound = false;
@@ -110,7 +110,7 @@ public class PrinterServant extends UnicastRemoteObject implements PrinterServic
 
     @Override
     public String start(String authObject) throws RemoteException {
-        if (!isAuthenticated(authObject)) return "Not authenticated!";
+        if (!isAuthenticated(authObject, "start")) return "Not authenticated!";
         if (!isAuthorized(authObject, "start")) return "Not authorized!";
         started = true;
 
@@ -128,7 +128,7 @@ public class PrinterServant extends UnicastRemoteObject implements PrinterServic
 
     @Override
     public String stop(String authObject) throws RemoteException {
-        if (!isAuthenticated(authObject)) return "Not authenticated!";
+        if (!isAuthenticated(authObject, "stop")) return "Not authenticated!";
         if (!isAuthorized(authObject, "stop")) return "Not authorized!";
         if (!started) return "Printer server not started.";
         started = false;
@@ -143,7 +143,7 @@ public class PrinterServant extends UnicastRemoteObject implements PrinterServic
 
     @Override
     public String restart(String authObject) throws RemoteException {
-        if (!isAuthenticated(authObject)) return "Not authenticated!";
+        if (!isAuthenticated(authObject, "restart")) return "Not authenticated!";
         if (!isAuthorized(authObject, "restart")) return "Not authorized!";
         if (!started) return "Printer server not started.";
 
@@ -156,7 +156,7 @@ public class PrinterServant extends UnicastRemoteObject implements PrinterServic
 
     @Override
     public String status(String printer, String authObject) throws RemoteException {
-        if (!isAuthenticated(authObject)) return "Not authenticated!";
+        if (!isAuthenticated(authObject, "status")) return "Not authenticated!";
         if (!isAuthorized(authObject, "status")) return "Not authorized!";
         if (!started) return "Printer server not started.";
         boolean printerFound = false;
@@ -178,7 +178,7 @@ public class PrinterServant extends UnicastRemoteObject implements PrinterServic
 
     @Override
     public String readConfig(String parameter, String authObject) throws RemoteException {
-        if (!isAuthenticated(authObject)) return "Not authenticated!";
+        if (!isAuthenticated(authObject, "readConfig")) return "Not authenticated!";
         if (!isAuthorized(authObject, "readConfig")) return "Not authorized!";
         if (!started) return "Printer server not started.";
 
@@ -195,7 +195,7 @@ public class PrinterServant extends UnicastRemoteObject implements PrinterServic
 
     @Override
     public String setConfig(String parameter, String value, String authObject) throws RemoteException {
-        if (!isAuthenticated(authObject)) return "Not authenticated!";
+        if (!isAuthenticated(authObject, "setConfig")) return "Not authenticated!";
         if (!isAuthorized(authObject, "setConfig")) return "Not authorized!";
         if (!started) return "Printer server not started.";
 
@@ -266,8 +266,8 @@ public class PrinterServant extends UnicastRemoteObject implements PrinterServic
         }
     }
 
-    private boolean isAuthenticated(String authObject) {
-
+    private boolean isAuthenticated(String authObject, String methodName) {
+        logger.log(Level.INFO, "Method " + methodName + " has been invoked");
         if (authObject == null) {
             logger.log(Level.WARNING, "authObject was null");
             return false;

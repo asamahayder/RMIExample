@@ -67,7 +67,7 @@ public class Database {
             connection.prepareStatement(helpInsertUserOperations(7, 0)).execute();  // user can print
             connection.prepareStatement(helpInsertUserOperations(7, 1)).execute();  // user can queue
 
-             connection.prepareStatement(helpInsertUserOperations(8, 0)).execute();
+            connection.prepareStatement(helpInsertUserOperations(8, 0)).execute();
             connection.prepareStatement(helpInsertUserOperations(8, 1)).execute();
             connection.prepareStatement(helpInsertUserOperations(8, 2)).execute();
             connection.prepareStatement(helpInsertUserOperations(8, 5)).execute();
