@@ -8,8 +8,8 @@ import java.util.Scanner;
 
 public class Client{
 
-    static String username = "User1";
-    static String password = "test1";
+    static String username = "George";
+    static String password = "test";
     static String authObject = username + ";" + password;
     static Scanner in = new Scanner(System.in);
 
