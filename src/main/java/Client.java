@@ -8,7 +8,7 @@ import java.util.Scanner;
 
 public class Client{
 
-    static String username = "George";
+    static String username = "Bob";
     static String password = "test";
     static String authObject = username + ";" + password;
     static Scanner in = new Scanner(System.in);

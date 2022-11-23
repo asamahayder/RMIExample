@@ -212,14 +212,10 @@ public class PrinterServant extends UnicastRemoteObject implements PrinterServic
         if (!started) return "Printer server not started.";
 
         Database db = new Database();
-        try{
-            db.makeChangesToUsers();
-        }catch (Exception e){
+        boolean result = db.makeChangesToUsers();
 
-        }
-
-
-        return
+        if (result)return "Success";
+        else return "Error!";
 
     }
 
