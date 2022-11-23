@@ -3,6 +3,7 @@ import database.*;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -215,12 +216,9 @@ public class PrinterServant extends UnicastRemoteObject implements PrinterServic
 
             if (authorizationMethod.getDescription().equals("list_based")){
                 //Getting all rows from userOperations that has userId
-                ArrayList<UserOperationDTO> userOperationDTOS = new ArrayList<>(); //TODO: get this from the db!!!
+                List<OperationDTO> operationDTOS = db.selectUserOperations(userDTO);
 
-                for (UserOperationDTO userOperationDTO : userOperationDTOS) {
-
-                    OperationDTO operationDTO = new OperationDTO(0, "placeholder"); //TODO: get this from the db!!
-
+                for (OperationDTO operationDTO : operationDTOS) {
                     if (operationDTO.getOperation().equals(methodName)) return true;
                 }
 
